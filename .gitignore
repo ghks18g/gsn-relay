@@ -1,0 +1,31 @@
+.idea
+.idea/
+.idea.*
+
+.DS_Store
+node_modules
+.env
+.openzeppelin
+
+# Hardhat files
+/cache
+/artifacts
+
+# Coverage files
+coverage
+coverage.json
+
+# TypeChain files
+/typechain
+/typechain-types
+
+# solidity-coverage files
+/coverage
+/coverage.json
+
+# Hardhat Ignition default folder for deployments against a local node
+ignition/deployments/chain-31337
+
+#Foundry
+cache_forge/
+out/
