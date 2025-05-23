@@ -43,9 +43,13 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@opengsn/common": "^2.2.5",
+    "@opengsn/contracts": "^2.2.5",
+    "@opengsn/provider": "^2.2.5",
     "@openzeppelin/contracts": "^5.3.0",
     "axios": "^1.9.0",
     "hardhat-contract-sizer": "^2.10.0",
+    "hi-base32": "^0.5.1",
     "prompts": "^2.4.2"
   }
 }
