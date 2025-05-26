@@ -79,6 +79,11 @@ const config: HardhatUserConfig = {
       },
     ],
   },
+  mocha: {
+    timeout: 20000, // 20초
+    bail: false, // 첫 실패에서 멈추지 않음
+    parallel: false, // 병렬 실행 비활성화 (기본은 false)
+  },
 };
 
 export default config;
