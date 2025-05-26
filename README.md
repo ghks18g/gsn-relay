@@ -29,3 +29,73 @@
 ```
 
 ![OpenGSN Architecture](./images/OpenGsn.png)
+
+# Off Chain 검증 & On Chain 검증
+
+- ## Off Chain 검증
+
+  - On-Chain 상태를 조회해서, Off-Chain 위치에서 서명된 요청의 유효성을 판단하는 과정
+
+- ## On Chain 검증
+
+  - 스마트 컨트랙트를 런타임 중, On-Chain 위에서 직접 상태를 읽어 유효성을 판단하는 과정
+
+- ## On Chain 검증 vs Off Chain 검증
+
+  | 항목        | On-Chain 검증                              | Off-Chain 검증                              |
+  | ----------- | ------------------------------------------ | ------------------------------------------- |
+  | 위치        | 스마트 컨트랙트 내부                       | Relay 서버, 클라이언트                      |
+  | 근거 데이터 | 런타임 체인 상태 + 스마트 컨트랙트 로직    | 조회한 체인 상태 + 서버 또는 Client 로직    |
+  | 실패 처리   | revert ( 트랜잭션 실패 )                   | 트랜잭션 거절 ( 제출 X )                    |
+  | 유연성      | 낮음 ( 배포된 스마트 컨트랙트의 불변성 )   | 높음 (서버 또는 Client 검증 로직 수정 용이) |
+  | 투명성      | 높음 ( 모든 검증 로직이 블록체인에 기록됨) | 낮음 ( 검증 로직은 체인 외부에서 실행됨 )   |
+  | 보안        | 검증 기반                                  | 신뢰 기반                                   |
+
+# GSN vs Trusted Forwarder
+
+### OpenGSN – _검증 기반 메타트랜잭션 릴레이 시스템_
+
+OpenGSN은 다음과 같은 특징을 가진 탈중앙화된 릴레이 네트워크입니다
+
+```
+1. 사용자가 서명된 요청 생성
+2. 릴레이 서버가 off-chain에서 유효성 검사
+3. relayWorker가 RelayHub.relayCall() 호출
+4. RelayHub가 stake 검증 후 Forwarder.execute() 호출
+5. Paymaster가 가스 수수료 환급
+```
+
+- 서명, 논스, Paymaster 로직 등을 스마트컨트랙트에서 온체인 검증
+- 부정 행위를 검출하고 슬래싱하는 스테이킹 시스템
+- 릴레이 로직과 수수료 정책의 분리
+- 퍼블릭 체인과 같이 누구나 참여 가능한 환경에 적합
+
+### Trusted Forwarder – _신뢰 기반 메타트랜잭션 릴레이 시스템_
+
+Trusted Forwarder 방식은 다음과 같은 특징을 가집니다
+
+```
+1. 사용자가 서명된 요청 생성
+2. 릴레이 서버가 off-chain에서 유효성 검사 (신뢰 기반)
+3. 릴레이 서버가 Forwarder.execute() 직접 호출
+4. 릴레이 서버가 자체 가스 대납 처리
+```
+
+- 사용자의 서명된 요청을 릴레이 서버가 수신
+- 서버가 직접 Forwarder.execute()를 호출하여 트랜잭션 수수료를 대납
+- 검증은 오직 서버 측에서만 수행
+- 시스템 구조가 단순하고 구현이 쉬우며, Ava Cloud Subnet 등 제한된 환경에서 유용
+
+| 항목                       | **OpenGSN**                                             | **Trusted Forwarder**           |
+| -------------------------- | ------------------------------------------------------- | ------------------------------- |
+| **시스템 유형**            | 검증 기반 (Verifiability-based)                         | 신뢰 기반 (Trust-based)         |
+| **릴레이 호출 방식**       | RelayHub → Forwarder                                    | Forwarder 직접 호출             |
+| **Stake / Slash 메커니즘** | 있음 (StakeManager, Penalizer)                          | 없음                            |
+| **가스 수수료 처리**       | Paymaster가 온체인에서 처리                             | 서버에서 자체 처리              |
+| **서명 및 논스 검증**      | Off-chain + On-chain 이중 검증                          | Off-chain에서만 검증            |
+| **필요한 스마트컨트랙트**  | RelayHub, Forwarder, Paymaster, StakeManager, Penalizer | Forwarder만 필요                |
+| **탈중앙성**               | 중간 (다수 relayWorker 운영 가능)                       | 낮음 (단일 서버 운영자)         |
+| **주요 사용 사례**         | 공개 네트워크, 퍼블릭 dApp                              | Ava Cloud Subnet, 프라이빗 체인 |
+| **보안 모델**              | 검증 가능성 기반                                        | 운영자에 대한 신뢰 기반         |
+
+---
